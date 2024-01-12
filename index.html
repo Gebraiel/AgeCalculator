@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
+  
+  <title>Frontend Mentor | Age calculator app</title>
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <style>
+    @font-face {
+      font-family: Poppins;
+      src: url('./assets/fonts/Poppins-Regular.ttf');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: Poppins;
+      src: url('./assets/fonts/Poppins-Bold.ttf');
+      font-weight: 700;
+    }
+    @font-face {
+      font-family: Poppins;
+      src: url('./assets/fonts/Poppins-ExtraBold.ttf');
+      font-weight: 800;
+    }
+    :root{
+      --light-grey-color:hsl(0, 0%, 86%);
+      --smokey-grey-color:hsl(0, 1%, 44%);
+      --offwhite-color:hsl(0, 0%, 94%);
+      --white-color:hsl(0, 0%, 100%);
+      --offblack-color:hsl(0, 0%, 8%);
+      --purple-color:hsl(259, 100%, 65%);
+      --lightred-color:hsl(0, 100%, 67%);
+    }
+    *{
+      padding:0;
+      margin:0;
+      box-sizing: border-box;
+    }
+    body{
+      background-color: var(--light-grey-color);
+      font-family: "Poppins",sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator{
+        max-width:400px;
+        background-color: var(--white-color);
+        padding:20px 15px;
+        border-radius: 8px;
+        border-bottom-right-radius: 50px;
+    }
+    form{
+      display: flex;
+      gap:10px;
+      position: relative;
+      padding-bottom:20px;
+      border-bottom:1px solid var(--light-grey-color);
+      
+    }
+    
+    .input-container{
+      display: flex;
+      flex-direction: column;
+      gap:5px;
+    }
+    .error{
+      color:var(--lightred-color);
+      font-size: 10px;
+      font-style: italic;
+    }
+    .date-error{
+      font-size: 16px;
+      margin-top: 10px;
+
+    }
+    label{
+      font-size: 10px;
+      color:var(--smokey-grey-color);
+      font-weight: 700;
+    }
+    input{
+      width:100px;
+      padding:5px;
+      font-weight: 800;
+      border-radius: 5px;
+      outline: none;
+
+      border:1px solid var(--smokey-grey-color);
+      transition: 0.3s;
+    }
+    input:focus{
+      caret-color: var(--purple-color);
+      border-color:var(--purple-color);
+    }
+    .button{
+      padding:8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      background-color: var(--purple-color);
+      position: absolute;
+      right: 0;
+      bottom:-50%;
+      transform: translateY(-50%);
+      cursor:pointer;
+      transition: 0.3s;
+    }
+    .button:hover{
+      background-color: black;
+    }
+    img{
+      width: 20px;
+    }
+    .result{
+      font-size: 32px;
+      font-weight: 800;
+      padding:20px 0;
+      font-style: italic;
+    }
+    .dash{
+      color:var(--purple-color)
+    }
+    @media(max-width:768px){
+      form{
+        padding-bottom:30px;
+      }
+      .button{
+        right:50%;
+        transform: translate(50%,-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <form action="">
+      <div class="input-container">
+        <label for="day">Day</label>
+        <input type="text" class="day" placeholder="DD">
+        <p class="day-error error"></p>
+      </div>
+      <div class="input-container">
+        <label for="month">Month</label>
+        <input type="text" class="month" placeholder="MM">
+        <p class="month-error error"></p>
+
+      </div>
+      <div class="input-container">
+        <label for="day">Year</label>
+        <input type="text" class="year" placeholder="YYYY">
+        <p class="year-error error"></p>
+      </div>
+      <div class="button"><img src="assets/images/icon-arrow.svg" alt=""></div>
+    </form>
+    <p class="error date-error"></p>
+
+    <div class="result">
+      <div class="year-container">
+        <span class="dash">--</span><span> years </span>
+      </div>
+      <div class="month-container">
+        <span class="dash">--</span><span> months </span>
+      </div>
+      <div class="day-container">
+        <span class="dash">--</span><span> days </span>
+      </div>
+    </div>
+  </div>
+  <script>
+    let form = document.querySelector('form');
+    let submitButton = document.querySelector('.button');
+    let inputs = document.querySelectorAll('input');
+    let resultYear = document.querySelector('.result .year-container .dash');
+    let resultMonth = document.querySelector('.result .month-container .dash');
+    let resultDay = document.querySelector('.result .day-container .dash');
+    let dayError = document.querySelector('.day-error');
+    let monthError = document.querySelector('.month-error');
+    let yearError = document.querySelector('.year-error');
+    let dateError = document.querySelector('.date-error');
+    let day = -1;
+    let month = -1;
+    let year = -1;
+    submitButton.addEventListener('click',(event)=>{
+      event.preventDefault();
+      if(day !=-1 && month!=-1&&year!=-1){
+        let isPast = isInThePast(day,month,year);
+        console.log(isPast);
+        if(!isPast){
+          dateError.textContent = "Date isn't in the past";
+        }else{
+          if(validateDate(day,month,year))
+          {
+            calculateAge(day,month,year);
+            dateError.textContent = '';
+          }
+          else{
+            dateError.textContent = 'Date Is invalid';
+          }
+        }
+      }
+    })
+    inputs.forEach((input)=>{
+      input.addEventListener('input',function(){
+        let regex = /\D/i;//Check that the input is digits
+        if(!regex.test(input.value))
+        {
+          if(input.value ==''){
+            input.nextElementSibling.textContent='This field is required';
+          }else{
+            if(input.classList.contains('day')){
+              if(!validateDay(input.value)){
+                dayError.textContent='Must be valid day'
+              }else{
+                day=input.value;
+                dayError.textContent=''
+              }
+            }else if(input.classList.contains('month')){
+
+              if(!validateMonth(input.value)){
+                monthError.textContent='Must be valid month'
+              }else{
+                month=input.value;
+                monthError.textContent=''
+              }
+            }else{
+
+              if(!validateYear(input.value)){
+                yearError.textContent='Must be valid year'
+              }else{
+                year =input.value;
+                yearError.textContent=''
+              }
+            }
+          }
+        }else{
+          input.nextElementSibling.textContent = 'Enter Digits 0-9'
+        }
+      })
+    })
+    function validateDay(day){
+      return(day<=31 && day>=1);
+    }
+    function validateMonth(month){
+      return(month<=12 && day>=1);
+    }
+    function validateYear(year){
+      let currentYear = new Date().getFullYear();
+      console.log(currentYear);
+      return(year<=currentYear);
+    }
+
+          
+    function validateDate(day,month,year){
+      let monthsDays = [31,28,31,30,31,30,31,31,30,31,30,31];
+      if(monthsDays[month-1]<day){
+        return(month == 2 && day == 29 && year%4==0);
+      }
+      return true;
+    }
+    function isInThePast(day,month,year){
+      let date = new Date(`${year}-${month}-${day}`);
+      console.log(date);
+      let dateNow = Date.now();
+      let differ = dateNow - date;
+      console.log(differ);
+      return differ >= 0;
+    }
+
+    function calculateAge(day,month,year){
+      let date = new Date(`${year}-${month}-${day}`);
+      let dateNow = Date.now();
+      let differ = dateNow - date;
+      let ageInYears = Math.floor(differ / (365.25 * 24 * 60 * 60 * 1000));
+      let ageInMonths = Math.floor((differ % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000));
+      let ageInDays = Math.floor((differ % (30.44 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+      console.log('Your age is: ' + ageInYears + ' years, ' + ageInMonths + ' months, and ' + ageInDays + ' days');
+
+      let years = Math.floor(differ / 1000 / 60 / 60 / 24 / 365.25);
+      let months = Math.floor((differ % (1000*60*60*24*365.25)) / (1000 * 60 * 60 * 24 * 30.44 ));
+      let days = Math.floor((differ%(1000 * 60 * 60 *24* 30.44)) / (1000*60*60*24));
+      resultYear.textContent = years;
+      resultMonth.textContent = months;
+      resultDay.textContent = days;
+
+    }
+
+  </script>
+</body>
+</html>
